@@ -1,0 +1,43 @@
+# Local benchmark output and model responses
+/runs/
+/logs/
+*.log
+
+# Personal endpoint settings and secrets
+/config.json
+/config.local.json
+/settings.json
+.env
+.env.*
+!.env.example
+
+# Model weights, checkpoints, downloads and caches
+/models/
+/artifacts/
+/checkpoints/
+/.cache/
+*.gguf
+*.ggml
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.onnx
+
+# Python and local tooling
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.worktrees/
+*.tmp
