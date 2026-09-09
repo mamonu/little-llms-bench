@@ -1,9 +1,14 @@
-# little-llms-bench
+# litlle llm bench
 
 A small, self-contained benchmark for grading local LLMs on **Python** and **Bash**.
 Python 3.10+ and the standard library only — no pip install. Works with a model
 server on this machine, on your home network, or a cloud service offering an
 OpenAI-compatible **Chat Completions** endpoint.
+
+**Start with `--stream`** to see tokens and reasoning as the server emits them.
+This is especially useful when debugging reasoning models: you can see their
+progress before the final answer arrives. Streaming uses one request at a time;
+reasoning is visible when the server includes it in the response.
 
 - **20 Python tasks**, graded by *actually executing* the model's code against hidden
   unit tests in an isolated subprocess. Pass = exit code 0.
@@ -28,7 +33,7 @@ Copy `config.example.json` to `config.json`, then edit the endpoint and model ID
 Your personal `config.json` is ignored by Git.
 
 ```sh
-python run_bench.py --config
+python run_bench.py --config --stream
 python run_bench.py -config other-config.json --max-tokens 16384
 ```
 
@@ -40,13 +45,13 @@ Launchers always read the adjacent `config.json` and forward extra flags:
 
 ```bat
 rem Windows (Command Prompt; in PowerShell use .\run_bench.bat)
-run_bench.bat
+run_bench.bat --stream
 run_bench.bat --only bash --limit 3
 ```
 
 ```sh
 # macOS / Linux
-./run_bench.sh
+./run_bench.sh --stream
 ./run_bench.sh --only python --limit 3
 ```
 
@@ -90,6 +95,7 @@ Try `--only bash --limit 1` for a small endpoint smoke test.
 | flag | effect |
 |---|---|
 | `-h` / `--help` | complete help, defaults, precedence, and examples |
+| `--stream` / `--no-stream` | debug with live tokens and reasoning; enabled streaming forces concurrency `1` |
 | `-config [PATH]` / `--config [PATH]` | explicitly load JSON settings |
 | `--base-url URL` | API base URL; default `http://localhost:8000/v1` |
 | `--api-key KEY` | Bearer token; default environment key or `not-needed` |
@@ -102,7 +108,6 @@ Try `--only bash --limit 1` for a small endpoint smoke test.
 | `--request-timeout 300` | positive HTTP socket timeout in seconds; default `300` |
 | `--exec-timeout 15` | positive Python grading timeout in seconds; default `15` |
 | `--concurrency 4` | positive parallel request count; default `1` |
-| `--stream` / `--no-stream` | enable/disable live tokens and reasoning; enabled streaming forces concurrency `1` |
 | `--extra-body JSON` | provider-specific JSON object; default `{}` |
 | `--outdir PATH` | output parent directory; default `runs` beside the script |
 | `--list` | print the task table and exit |

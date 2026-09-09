@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""lolllmbench - a small Python + Bash benchmark for local LLMs.
+"""litlle llm bench - a small Python + Bash benchmark for local LLMs.
 
 Talks to any OpenAI-compatible /v1/chat/completions endpoint, grades Python
 tasks by actually executing the model's code against hidden unit tests, and
@@ -7,7 +7,7 @@ grades Bash tasks by normalised string match.
 
 Usage
 -----
-    python run_bench.py --model my-model
+    python run_bench.py --model my-model --stream
     python run_bench.py --model my-model --only python --limit 5
     python run_bench.py --config config.json --model my-model
     python run_bench.py --list
@@ -443,7 +443,7 @@ def summarise(records: list[dict]) -> dict:
 def write_report(outdir: Path, cfg: dict, records: list[dict], summary: dict) -> Path:
     lines = []
     a = lines.append
-    a(f"# lolllmbench report - `{cfg['model']}`\n")
+    a(f"# litlle llm bench report - `{cfg['model']}`\n")
     a(f"- endpoint: `{cfg['base_url']}`")
     a(f"- run: {dt.datetime.now().isoformat(timespec='seconds')}")
     a(f"- temperature: {cfg['temperature']}\n")
@@ -486,7 +486,9 @@ def write_report(outdir: Path, cfg: dict, records: list[dict], summary: dict) ->
 # --------------------------------------------------------------------------
 def parse_options(argv=None):
     ap = argparse.ArgumentParser(
-        description="Benchmark Python + Bash through a local, LAN, or cloud OpenAI-compatible API.",
+        description=("litlle llm bench - benchmark Python + Bash through a local, LAN, or cloud API.\n"
+                     "Start with --stream to see tokens and reasoning as the server emits them;\n"
+                     "especially useful for debugging reasoning models."),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         allow_abbrev=False,
         epilog="""Precedence: built-in defaults < OPENAI_API_KEY < config file < explicit flags.
@@ -495,7 +497,7 @@ extra_body replaces the file's object; core request fields cannot be overridden 
 The server must provide Chat Completions; this does not start a model server.
 
 Examples:
-  python run_bench.py --config
+  python run_bench.py --config --stream
   python run_bench.py -config my-config.json --max-tokens 8192
   python run_bench.py --base-url http://localhost:8000/v1 --model local-model
   python run_bench.py --base-url http://192.168.1.10:8000/v1 --model local-model
@@ -503,6 +505,11 @@ Examples:
 """)
     ap.add_argument("-config", "--config", nargs="?", const=str(ROOT / "config.json"),
                     metavar="PATH", help="load JSON file; omitted PATH means config.json beside this script")
+    stream = ap.add_mutually_exclusive_group()
+    stream.add_argument("--stream", action="store_true", default=None,
+                        help="debug with live tokens and reasoning; forces concurrency 1 (default: off)")
+    stream.add_argument("--no-stream", dest="stream", action="store_false",
+                        help="disable streaming, including when enabled in the config file")
     descriptions = {
         "base_url": "API base URL including any /v1 prefix; /chat/completions is appended",
         "api_key": "Bearer API key; defaults to OPENAI_API_KEY or not-needed",
@@ -524,11 +531,6 @@ Examples:
                     help="task language to select (default: all)")
     ap.add_argument("--limit", type=int, help="run the first N selected tasks; positive integer (default: all)")
     ap.add_argument("--id", action="append", help="run only these task ids (repeatable)")
-    stream = ap.add_mutually_exclusive_group()
-    stream.add_argument("--stream", action="store_true", default=None,
-                        help="print tokens and reasoning live; forces concurrency 1 (default: off)")
-    stream.add_argument("--no-stream", dest="stream", action="store_false",
-                        help="disable streaming, including when enabled in the config file")
     ap.add_argument("--outdir", default=str(ROOT / "runs"),
                     help="parent directory for timestamped results (default: runs beside this script)")
     ap.add_argument("--list", action="store_true", help="list tasks and exit")

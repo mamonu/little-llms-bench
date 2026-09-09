@@ -1,4 +1,4 @@
-"""Python task bank for lolllmbench.
+"""Python task bank for litlle llm bench.
 
 Each task is a dict:
     id          unique short id

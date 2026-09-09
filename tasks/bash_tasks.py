@@ -1,4 +1,4 @@
-"""Bash task bank for lolllmbench.
+"""Bash task bank for litlle llm bench.
 
 These are graded WITHOUT executing anything (the benchmark host is Windows):
 the model is asked for a short exact answer, and the harness compares its last
